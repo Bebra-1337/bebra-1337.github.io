@@ -21,7 +21,7 @@
 1. **Скачайте исходный код Qt 5.15.2:**
    Перейдите на [официальный сайт Qt](https://download.qt.io/official_releases/qt/5.15/5.15.2/single/) и скачайте архив с исходным кодом:
    ```bash
-   wget wget https://mirrors.tuna.tsinghua.edu.cn/qt/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
+   wget https://mirrors.tuna.tsinghua.edu.cn/qt/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
    ```
 
 2. **Распакуйте архив:**
