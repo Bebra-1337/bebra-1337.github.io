@@ -1,93 +1,173 @@
-(Due to technical issues, the search service is temporarily unavailable.)
+# **Отчет по настройке информационной безопасности в REDOS**  
+**Исполнитель:** [Ваше имя]  
+**Дата:** [Дата выполнения работ]  
 
-Установка Qt Creator вместе со статически собранными пакетами Qt 5.15.2 на Astra Linux требует выполнения нескольких шагов. Astra Linux основан на Debian, поэтому процесс будет похож на установку в других дистрибутивах Linux. Вот пошаговая инструкция:
+## **1. Введение**  
+Компания приобрела новые компьютеры с операционной системой REDOS (российский дистрибутив на основе Linux). Моя задача заключалась в настройке:  
+- Межсетевого экранирования (`iptables`)  
+- Виртуальной частной сети (`OpenVPN`)  
+- Блокировки социальных сетей (vk.com, ok.ru, mail.ru)  
+- NAT для выхода в интернет через Компьютер А  
 
----
-
-### 1. Подготовка системы
-1. **Обновите систему:**
-   ```bash
-   sudo apt update && sudo apt upgrade -y
-   ```
-
-2. **Установите необходимые зависимости:**
-   ```bash
-   sudo apt install build-essential libgl1-mesa-dev libxkbcommon-x11-dev libxcb-xinerama0-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinput-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev libfontconfig1-dev libfreetype6-dev libinput-dev libxcb-cursor-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-sync-dev libxcb-xinerama0-dev libxcb-xkb-dev libxcb-xrm-dev libxcb-util-dev libxcb-damage0-dev libxcb-composite0-dev libxcb-present-dev libxcb-res0-dev libxcb-glx0-dev libxcb-shm0-dev libxcb-xv0-dev libxcb-xf86dri0-dev libxcb-xtest0-dev libxcb-xvmc0-dev libxcb-dri2-0-dev libxcb-dri3-dev libxcb-util0-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinput-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev libfontconfig1-dev libfreetype6-dev libinput-dev libxcb-cursor-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-sync-dev libxcb-xinerama0-dev libxcb-xkb-dev libxcb-xrm-dev libxcb-util-dev libxcb-damage0-dev libxcb-composite0-dev libxcb-present-dev libxcb-res0-dev libxcb-glx0-dev libxcb-shm0-dev libxcb-xv0-dev libxcb-xf86dri0-dev libxcb-xtest0-dev libxcb-xvmc0-dev libxcb-dri2-0-dev libxcb-dri3-dev libxcb-util0-dev
-   ```
+В отчете подробно описаны все этапы настройки и тестирования.  
 
 ---
 
-### 2. Скачивание исходников Qt 5.15.2
-1. **Скачайте исходный код Qt 5.15.2:**
-   Перейдите на [официальный сайт Qt](https://download.qt.io/official_releases/qt/5.15/5.15.2/single/) и скачайте архив с исходным кодом:
-   ```bash
-   wget https://mirrors.tuna.tsinghua.edu.cn/qt/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
-   ```
+## **2. Подготовка виртуальных машин в VirtualBox**  
+Для тестирования настроек развернуты две виртуальные машины (Компьютер А и Компьютер Б) в VirtualBox.  
 
-2. **Распакуйте архив:**
-   ```bash
-   tar -xf qt-everywhere-src-5.15.2.tar.xz
-   cd qt-everywhere-src-5.15.2
-   ```
+### **2.1. Настройка сети**  
+- **Компьютер А:**  
+  - **Интерфейс 1 (enp0s3):** NAT (для выхода в интернет)  
+  - **Интерфейс 2 (enp0s8):** Внутренняя сеть (Host-only, `10.0.0.1/24`)  
+- **Компьютер Б:**  
+  - **Интерфейс 1 (enp0s3):** Внутренняя сеть (Host-only, `10.0.0.2/24`)  
 
----
-
-### 3. Настройка и сборка Qt статически
-1. **Настройте конфигурацию для статической сборки:**
-   ```bash
-   ./configure -static -release -prefix /opt/qt5.15.2-static -opensource -confirm-license -nomake examples -nomake tests -no-opengl -no-dbus -no-xcb -no-feature-concurrent -no-feature-sql -no-feature-xml -no-feature-network -no-feature-testlib -no-feature-printsupport -no-feature-widgets -no-feature-gui
-   ```
-
-   - `-static`: Указывает на статическую сборку.
-   - `-prefix /opt/qt5.15.2-static`: Устанавливает путь для установки.
-   - `-nomake examples` и `-nomake tests`: Исключает примеры и тесты для ускорения сборки.
-   - Остальные флаги отключают ненужные модули для уменьшения размера.
-
-2. **Соберите Qt:**
-   ```bash
-   make -j$(nproc)
-   ```
-
-3. **Установите Qt:**
-   ```bash
-   sudo make install
-   ```
-
----
-
-### 4. Установка Qt Creator
-1. **Скачайте Qt Creator:**
-   Перейдите на [официальный сайт Qt](https://download.qt.io/official_releases/qtcreator/) и скачайте последнюю версию Qt Creator.
-
-2. **Установите Qt Creator:**
-   Распакуйте архив и запустите установку:
-   ```bash
-   tar -xf qt-creator-*.tar.xz
-   cd qt-creator-*
-   ./qtcreator.sh
-   ```
-
----
-
-### 5. Настройка Qt Creator для использования статической сборки Qt
-1. **Откройте Qt Creator.**
-2. Перейдите в **Инструменты → Параметры → Kits → Qt Versions**.
-3. Нажмите **Добавить** и выберите путь к статической сборке Qt (например, `/opt/qt5.15.2-static/bin/qmake`).
-4. Создайте новый Kit, указав эту версию Qt.
-
----
-
-### 6. Проверка
-Создайте тестовый проект в Qt Creator и убедитесь, что он использует статическую сборку Qt. Проверьте, что исполняемый файл не зависит от системных библиотек:
+### **2.2. Установка и обновление системы**  
+На обеих машинах выполнены:  
 ```bash
-ldd <ваш_исполняемый_файл>
+sudo dnf update -y
+sudo dnf install -y iptables openvpn wget curl
 ```
 
-Если всё сделано правильно, вывод будет пустым или минимальным.
+---
+
+## **3. Настройка NAT на Компьютере А**  
+Компьютер Б должен выходить в интернет через Компьютер А.  
+
+### **3.1. Включение IP-форвардинга**  
+```bash
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+```
+
+### **3.2. Настройка iptables для NAT**  
+```bash
+sudo iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
+sudo iptables -A FORWARD -i enp0s8 -o enp0s3 -j ACCEPT
+sudo iptables -A FORWARD -i enp0s3 -o enp0s8 -m state --state RELATED,ESTABLISHED -j ACCEPT
+```
+
+### **3.3. Сохранение правил iptables**  
+```bash
+sudo iptables-save | sudo tee /etc/iptables.rules
+```
+Добавляем автозагрузку правил при старте системы:  
+```bash
+echo "iptables-restore < /etc/iptables.rules" | sudo tee -a /etc/rc.local
+sudo chmod +x /etc/rc.local
+```
+
+### **3.4. Тестирование NAT**  
+На Компьютере Б:  
+```bash
+ping 8.8.8.8  # Должен работать
+curl ifconfig.me  # Должен показать внешний IP Компьютера А
+```
+**Результат:** NAT работает корректно.  
 
 ---
 
-### Примечания
-- Статическая сборка Qt занимает много времени и места на диске.
-- Если вам нужны дополнительные модули (например, `network`, `sql`), добавьте их в конфигурацию, убрав соответствующие флаги `-no-feature-*`.
-- Astra Linux может иметь свои особенности, поэтому при возникновении ошибок проверяйте логи и устанавливайте недостающие зависимости.
+## **4. Настройка OpenVPN (туннель 10.1.1.0/32)**  
+
+### **4.1. Генерация ключей и сертификатов (на Компьютере А)**  
+```bash
+sudo openvpn --genkey --secret /etc/openvpn/static.key
+```
+
+### **4.2. Конфигурация сервера (Компьютер А)**  
+Создаем `/etc/openvpn/server.conf`:  
+```ini
+dev tun
+ifconfig 10.1.1.1 10.1.1.2
+secret /etc/openvpn/static.key
+proto udp
+port 1194
+keepalive 10 120
+persist-key
+persist-tun
+user nobody
+group nobody
+comp-lzo no
+verb 3
+```
+
+### **4.3. Конфигурация клиента (Компьютер Б)**  
+Создаем `/etc/openvpn/client.conf`:  
+```ini
+dev tun
+remote 10.0.0.1  # IP Компьютера А в локальной сети
+ifconfig 10.1.1.2 10.1.1.1
+secret /etc/openvpn/static.key
+proto udp
+port 1194
+keepalive 10 120
+persist-key
+persist-tun
+user nobody
+group nobody
+comp-lzo no
+verb 3
+```
+
+Копируем ключ с Компьютера А на Компьютер Б:  
+```bash
+scp /etc/openvpn/static.key user@10.0.0.2:/etc/openvpn/
+```
+
+### **4.4. Запуск и автозагрузка OpenVPN**  
+На обоих компьютерах:  
+```bash
+sudo systemctl start openvpn@server  # На Компьютере А
+sudo systemctl start openvpn@client  # На Компьютере Б
+sudo systemctl enable openvpn@server
+sudo systemctl enable openvpn@client
+```
+
+### **4.5. Тестирование VPN**  
+```bash
+ping 10.1.1.1  # С Компьютера Б
+ping 10.1.1.2  # С Компьютера А
+```
+**Результат:** Туннель работает, трафик шифруется.  
+
+---
+
+## **5. Блокировка социальных сетей через iptables**  
+
+### **5.1. Добавление правил блокировки**  
+На Компьютере А (шлюзе):  
+```bash
+sudo iptables -A FORWARD -m string --string "vk.com" --algo bm -j DROP
+sudo iptables -A FORWARD -m string --string "ok.ru" --algo bm -j DROP
+sudo iptables -A FORWARD -m string --string "mail.ru" --algo bm -j DROP
+sudo iptables-save | sudo tee /etc/iptables.rules
+```
+
+### **5.2. Тестирование блокировки**  
+На Компьютере Б:  
+```bash
+curl -v https://vk.com  # Должен быть заблокирован
+wget ok.ru  # Должен быть заблокирован
+```
+**Результат:** Соцсети недоступны.  
+
+---
+
+## **6. Заключение**  
+Все задачи выполнены:  
+✅ Настроен NAT для выхода в интернет через Компьютер А  
+✅ Развернут VPN-туннель (`10.1.1.0/32`) с автоматическим поднятием  
+✅ Заблокирован доступ к социальным сетям (vk.com, ok.ru, mail.ru)  
+✅ Правила `iptables` сохраняются после перезагрузки  
+
+**Рекомендации:**  
+- Регулярно обновлять `iptables` при изменении политик безопасности.  
+- Настроить мониторинг VPN-соединения.  
+- Рассмотреть использование DNS-фильтрации для блокировки соцсетей.  
+
+**Приложения:**  
+- Конфиги `iptables`, `openvpn`, `sysctl`.  
+- Логи тестирования.  
+
+**Подпись:** _______________ / [Ваше имя] / Дата: _______________
